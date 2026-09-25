@@ -1,0 +1,7 @@
+// Runs at image build time, in %SYS, and re-runnable by hand after a code change:
+//
+//   docker exec -i docket iris session IRIS -U%SYS < docker/init.script
+//
+do $system.OBJ.LoadDir("/opt/portal/src", "ck", , 1)
+try { do ##class(App.Setup).Run() } catch e { write !, "SETUP FAILED: ", e.DisplayString(), ! do $system.Process.Terminate(,1) }
+halt

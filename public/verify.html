@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Docket - audit chain verifier</title>
+    <style>
+      :root {
+        --base: oklch(13% 0.028 261.692);
+        --surface: oklch(21% 0.034 264.665);
+        --inset: oklch(16.5% 0.03 262.5);
+        --line: oklch(27.8% 0.033 256.848 / 0.8);
+        --line-strong: oklch(37.3% 0.034 259.733);
+        --text: oklch(92.8% 0.006 264.531);
+        --muted: oklch(87% 0.065 274.039 / 0.65);
+        --bright: oklch(98.5% 0.002 247.839);
+        --accent: oklch(58.5% 0.233 277.117);
+        --ok: oklch(76.5% 0.177 163.223);
+        --warn: oklch(82.8% 0.189 84.429);
+        --bad: oklch(70.4% 0.191 22.216);
+        --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 40px 16px 64px;
+        background: var(--base);
+        color: var(--text);
+        font:
+          15px/1.53 Inter,
+          system-ui,
+          sans-serif;
+        letter-spacing: -0.0125em;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        max-width: 780px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 24px;
+        line-height: 1.42;
+        letter-spacing: -0.0268em;
+        color: var(--bright);
+      }
+      p {
+        margin: 0 0 10px;
+      }
+      .lede,
+      .foot {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      code,
+      pre,
+      .mono {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0;
+      }
+      #drop {
+        margin: 22px 0 10px;
+        padding: 26px 20px;
+        border: 1px dashed var(--line-strong);
+        border-radius: 16px;
+        background: var(--surface);
+        text-align: center;
+        transition:
+          border-color 0.12s,
+          background 0.12s;
+      }
+      #drop.over {
+        border-color: var(--accent);
+        background: var(--inset);
+      }
+      button {
+        height: 32px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--accent);
+        box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.16);
+        color: var(--bright);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      textarea {
+        width: 100%;
+        height: 78px;
+        margin-top: 10px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--inset);
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 13px;
+        resize: vertical;
+      }
+      .verdict {
+        margin: 18px 0 0;
+        padding: 14px 16px;
+        border: 1px solid;
+        border-radius: 16px;
+        font-size: 18px;
+        line-height: 1.5;
+        color: var(--bright);
+      }
+      .verdict small {
+        display: block;
+        margin-top: 4px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .ok {
+        border-color: var(--ok);
+        background: oklch(76.5% 0.177 163.223 / 0.14);
+      }
+      .warn {
+        border-color: var(--warn);
+        background: oklch(82.8% 0.189 84.429 / 0.14);
+      }
+      .bad {
+        border-color: var(--bad);
+        background: oklch(70.4% 0.191 22.216 / 0.14);
+      }
+      dl {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 6px 10px;
+        margin: 14px 0 0;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface);
+        font-size: 13px;
+      }
+      dt {
+        color: var(--muted);
+      }
+      dd {
+        margin: 0;
+        font-family: var(--mono);
+        overflow-wrap: anywhere;
+        color: var(--bright);
+      }
+      table {
+        width: 100%;
+        margin-top: 14px;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      th,
+      td {
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 500;
+      }
+      td:first-child {
+        font-family: var(--mono);
+        color: var(--bad);
+      }
+      details {
+        margin-top: 22px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      summary {
+        cursor: pointer;
+      }
+      pre {
+        margin: 8px 0 0;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--inset);
+        font-size: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Audit chain verifier</h1>
+      <p class="lede">
+        Drop a journal export from Docket's Audit screen. This page re-computes every digest and says whether the chain
+        holds - offline, with no account on the instance and no way to ask it anything. It is a static file: save it,
+        take it somewhere else, and it reaches the same answer.
+      </p>
+
+      <div id="drop">
+        <button id="pick" type="button">Choose an export…</button>
+        <p class="foot" style="margin: 10px 0 0">or drop the .json file here, or paste it below</p>
+        <input id="file" type="file" accept=".json,application/json" hidden />
+        <textarea id="paste" spellcheck="false" placeholder='{ "entries": [ … ] }'></textarea>
+      </div>
+
+      <div id="out"></div>
+
+      <details>
+        <summary>How the digest is computed</summary>
+        <p style="margin-top: 8px">
+          Each entry is hashed together with the digest of the one before it, so altering a record, removing one or
+          slipping one in changes every digest after it. The recipe, which this page implements in about thirty lines
+          and anything with a SHA-256 can implement in as few:
+        </p>
+        <pre>
+record    = the entry without its prevHash and hash fields
+canonical = JSON of record, keys sorted, no whitespace  (args stays the stored string)
+hash      = base64( sha256( utf8( prevHash + canonical ) ) )</pre>
+        <p style="margin-top: 8px">
+          A file that starts at sequence 1 with an empty prevHash carries its own beginning. A file that starts later is
+          a slice: the entries in it can still be shown unaltered and consecutive, but nothing in it can say what
+          happened before the first one.
+        </p>
+      </details>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const out = $("out");
+      const enc = new TextEncoder();
+
+      const canonical = (o) =>
+        JSON.stringify(
+          Object.fromEntries(
+            Object.keys(o)
+              .sort()
+              .map((k) => [k, o[k]]),
+          ),
+        );
+
+      async function digest(prevHash, record) {
+        const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(prevHash + canonical(record))));
+        return btoa(String.fromCharCode(...bytes));
+      }
+
+      /** The three shapes the export can arrive in, and nothing clever about any of them. */
+      function entriesOf(json) {
+        const e = json?.entries ?? json?.data?.entries ?? json;
+        if (!Array.isArray(e)) throw new Error("no entries array in this file");
+        if (!e.length) throw new Error("the export contains no entries");
+        if (typeof e[0]?.args === "object" && e[0].args !== null)
+          throw new Error(
+            "this file has args parsed into objects. The digest is taken over the stored string, " +
+              "so only /audit/export can be verified - not the on-screen CSV or an export from an older build.",
+          );
+        return e;
+      }
+
+      async function check(text, meta) {
+        let entries;
+        try {
+          entries = entriesOf(JSON.parse(text));
+        } catch (e) {
+          return render({ error: e.message });
+        }
+        try {
+          out.innerHTML = `<div class="verdict warn">Checking ${entries.length} entries…</div>`;
+          await new Promise(requestAnimationFrame);
+
+          // By sequence, whatever order the file arrives in. The chain is defined by the
+          // sequence, and the sequence is itself one of the hashed fields - so sorting cannot
+          // hide anything, and a file somebody re-ordered still gets a straight answer.
+          entries.sort((a, b) => a.seq - b.seq);
+          const broken = [];
+          const gaps = [];
+          let prev = null;
+          let prevSeq = null;
+          for (const e of entries) {
+            const { prevHash = "", hash, ...record } = e;
+            if ((await digest(prevHash, record)) !== hash) {
+              broken.push([e.seq, "altered after it was written - the entry does not match its own digest"]);
+            } else if (prev === null) {
+              if (e.seq === 1 && prevHash !== "")
+                broken.push([e.seq, "claims to be the first entry but follows something"]);
+            } else if (e.seq !== prevSeq + 1) {
+              gaps.push([prevSeq, e.seq]);
+            } else if (prevHash !== prev) {
+              broken.push([e.seq, "does not follow the entry before it - a record was inserted or removed"]);
+            }
+            prev = hash;
+            prevSeq = e.seq;
+          }
+          render({ entries, broken, gaps, meta, source: text.length });
+        } catch (e) {
+          render({ error: e.message });
+        }
+      }
+
+      function render({ error, entries, broken, gaps, meta, source }) {
+        if (error) {
+          out.innerHTML = `<div class="verdict bad">Cannot read this file<small>${esc(error)}</small></div>`;
+          return;
+        }
+        const first = entries[0].seq;
+        const last = entries[entries.length - 1].seq;
+        const missing = gaps.map((g) => (g[0] + 1 === g[1] - 1 ? `${g[1] - 1}` : `${g[0] + 1}-${g[1] - 1}`)).join(", ");
+
+        // Four answers, and the difference between them is the whole point. A hole in the file
+        // and a hole in the journal look identical from outside - so this says which questions
+        // the file can settle and which it cannot, rather than rounding either way to "fine".
+        let tone = "ok";
+        let headline = "Chain intact";
+        let note = `All ${entries.length} entries hash as written, in one unbroken run from the first entry. Nothing was altered, inserted or removed.`;
+        if (broken.length) {
+          tone = "bad";
+          headline = `Chain broken at ${broken
+            .slice(0, 4)
+            .map((b) => "#" + b[0])
+            .join(", ")}${broken.length > 4 ? ` and ${broken.length - 4} more` : ""}`;
+          note = `${broken.length} of ${entries.length} entries do not add up; the rest hash as written.`;
+        } else if (gaps.length) {
+          tone = "warn";
+          headline = "Entries are missing from this file";
+          note =
+            `Everything present hashes as written, but the sequence skips ${missing}. A digest cannot tell a ` +
+            `filtered export from a record that was removed - and a full export from the Audit screen has no gaps in it.`;
+        } else if (first !== 1) {
+          tone = "warn";
+          headline = "Slice verified";
+          note =
+            `Entries ${first}-${last} hash as written and follow one another. The file starts part way through the ` +
+            `journal, so it cannot say anything about what came before entry ${first}.`;
+        }
+        out.innerHTML =
+          `<div class="verdict ${tone}">${headline}<small>${esc(note)}</small></div>` +
+          `<dl>` +
+          row("Entries", `${entries.length} (sequence ${first}-${last})`) +
+          row("Verified here", new Date().toISOString().replace("T", " ").slice(0, 19)) +
+          (meta?.instance ? row("Exported from", meta.instance) : "") +
+          (meta?.exportedAt ? row("Exported at", meta.exportedAt) : "") +
+          row("Head digest", entries[entries.length - 1].hash) +
+          row("File size", `${Math.round(source / 1024)} KB`) +
+          `</dl>` +
+          (broken.length
+            ? `<table><thead><tr><th>Entry</th><th>What is wrong</th></tr></thead><tbody>` +
+              broken.map(([seq, why]) => `<tr><td>#${seq}</td><td>${esc(why)}</td></tr>`).join("") +
+              `</tbody></table>`
+            : "");
+      }
+
+      const row = (k, v) => `<dt>${k}</dt><dd>${esc(String(v))}</dd>`;
+      const esc = (s) => s.replace(/[<&]/g, (c) => (c === "<" ? "&lt;" : "&amp;"));
+
+      function read(file) {
+        const r = new FileReader();
+        r.onload = () => {
+          let meta = {};
+          try {
+            const j = JSON.parse(r.result);
+            meta = j.data ?? j;
+          } catch {
+            /* check() reports it */
+          }
+          check(r.result, meta);
+        };
+        r.readAsText(file);
+      }
+
+      $("pick").onclick = () => $("file").click();
+      $("file").onchange = (e) => e.target.files[0] && read(e.target.files[0]);
+      $("paste").oninput = (e) => {
+        const text = e.target.value.trim();
+        if (text.length > 1) check(text, safeMeta(text));
+      };
+      const safeMeta = (text) => {
+        try {
+          const j = JSON.parse(text);
+          return j.data ?? j;
+        } catch {
+          return {};
+        }
+      };
+
+      const drop = $("drop");
+      drop.ondragover = (e) => (e.preventDefault(), drop.classList.add("over"));
+      drop.ondragleave = () => drop.classList.remove("over");
+      drop.ondrop = (e) => {
+        e.preventDefault();
+        drop.classList.remove("over");
+        if (e.dataTransfer.files[0]) read(e.dataTransfer.files[0]);
+      };
+
+      if (!window.crypto?.subtle) {
+        out.innerHTML =
+          `<div class="verdict bad">This browser will not do SHA-256 here` +
+          `<small>crypto.subtle is only available in a secure context. Open this page from the portal ` +
+          `(/portal/verify.html) or over https rather than from the filesystem.</small></div>`;
+      }
+    </script>
+  </body>
+</html>

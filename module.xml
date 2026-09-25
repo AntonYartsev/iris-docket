@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="docket.ZPM">
+<Module>
+  <Name>docket</Name>
+  <Version>1.0.0</Version>
+  <Description>Governed management portal for InterSystems IRIS: policy-gated, tamper-evident, ui-bounded</Description>
+  <Keywords>management-portal admin api policy audit openapi</Keywords>
+  <Packaging>module</Packaging>
+  <SourcesRoot>src</SourcesRoot>
+  <Author>
+    <Person>Anton Yartsev</Person>
+  </Author>
+  <Resources>
+    <Resource Name="App.PKG"/>
+    <Resource Name="dist/" ProcessorClass="FileCopy">
+      <Attribute Name="InstallDirectory">${cspdir}docket</Attribute>
+    </Resource>
+  </Resources>
+  <Invokes>
+    <Invoke Class="App.Setup" Method="Run" Phase="Activate" When="After">
+      <Arg>${cspdir}docket</Arg>
+      <Arg>${root}src/Demo</Arg>
+      <Arg>0</Arg>
+    </Invoke>
+    <Invoke Class="App.UnitTest.Runner" Method="All" Phase="Test" When="After"/>
+  </Invokes>
+</Module>
+</Document>
+</Export>

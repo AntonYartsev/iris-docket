@@ -1,0 +1,222 @@
+{
+ "$comment": [
+  "Overlay on spec/mainspec_v2.json: where the live instance departs from the spec.",
+  "Spec is the source of truth about the SHAPE of the API; this file is the source of truth",
+  "about where reality differs. Every entry was reproduced live on",
+  "intersystemsdc/iris-community:2026.2 (IRIS 2026.2 Build 221U) on 2026-09-16.",
+  "Consumed by tools/gen_registry.py and by App.Admin.Client."
+ ],
+ "instance_verified": {
+  "image": "intersystemsdc/iris-community:2026.2",
+  "server_version": "IRIS for UNIX (Ubuntu Server LTS for ARM64 Containers) 2026.2 (Build 221U) Fri Jun 26 2026 09:59:12 EDT",
+  "date": "2026-09-16",
+  "also_checked": [
+   "intersystemsdc/irishealth-community:2026.2",
+   "intersystemsdc/iris-community:latest (2026.1)"
+  ]
+ },
+ "client_behaviour": {
+  "$comment": "Flags App.Admin.Client must honour for every call.",
+  "errorEnvelope": {
+   "drift": "D-01",
+   "spec": "status.Errors : array of strings",
+   "actual": "status.errors : array of objects",
+   "errorFields": [
+    "error",
+    "code",
+    "domain",
+    "id",
+    "params",
+    "errors"
+   ],
+   "rule": "Parse status.errors[]. Branch on .id and .code, NEVER on the HTTP status.",
+   "renderFrom": "errors[].error",
+   "doNotRenderFrom": "status.summary - it is HTML-escaped (&#39;), errors[].error is not",
+   "nested": "errors[].errors[] appears on datatype validation failures - flatten recursively",
+   "emptyBodyStatuses": [
+    401,
+    404
+   ],
+   "note": "401 and route-level 404 return a zero-length body. 403 from a privilege denial returns the envelope with an EMPTY errors array - no machine-readable reason."
+  },
+  "login": {
+   "drift": "D-02, D-09",
+   "spec": "LoginResponse = {result:{access_token,...}}",
+   "actual": "flat body: {access_token, refresh_token, sub, iat, exp} - no result wrapper",
+   "accessTokenTtlSeconds": 60,
+   "refreshTokenTtlSeconds": 900,
+   "refreshRotates": true,
+   "rule": "Read token fields from the top level. Refresh proactively before every batch; 60s is short enough that a slow screen will otherwise 401 mid-render.",
+   "absentFromLiveSpec": "/login, /logout, /refresh, /revoke are missing from the instance's own generated spec but DO work",
+   "revokeEqualsLogout": "both kill access AND refresh for the whole session"
+  },
+  "basicAuthFallback": {
+   "$comment": "Not a drift - a release-model constraint. :latest is 2026.1, where /login returns 401 and /v2/* is 404.",
+   "rule": "Basic auth is the primary path and works on 2026.1 and 2026.2. Probe POST /login once at startup; enable JWT only if it answers 200.",
+   "detect": "GET /info -> result.apiVersion (1 on 2026.1, 2 on 2026.2)"
+  },
+  "async": {
+   "drift": "D-05, D-06, D-07",
+   "rule": "The 202 body is an EMPTY envelope and carries no task id. Read the GUID from the LOCATION response header.",
+   "headerName": "LOCATION",
+   "headerIsUppercase": true,
+   "headerPointsTo": "/api/admin/v1/async-result?id=<GUID>",
+   "headerVersionMismatch": "header points at v1 while we call v2; both answer for the same GUID",
+   "guidMissingFrom": "GET /v2/async-result (single) - present only in GET /v2/async-results (list)",
+   "states": [
+    "Queued",
+    "Running",
+    "Finished",
+    "Failed",
+    "Canceled",
+    "Paused"
+   ],
+   "perUser": "Tasks are strictly private: another user gets 404 LoadObjectNotFound, and their /v2/async-results is empty. A shared 'what is running now' screen is impossible on this API.",
+   "note": "Async tasks keep running with no client attached - verified by abandoning the connection."
+  },
+  "listTruncation": {
+   "drift": "D-13",
+   "rule": "detectTruncation - lists silently cut at 1000 rows with NO indicator in the response.",
+   "defaultMaxRows": 1000,
+   "mitigation": "Always send an explicit maxRows. If rows == maxRows, treat the page as possibly truncated and warn.",
+   "ignoredValues": [
+    0,
+    -1,
+    "non-numeric"
+   ],
+   "noPagination": "no offset / skip / page / sort parameter exists on any list endpoint - paginate and sort client-side",
+   "filterSemantics": "case-insensitive substring across the WHOLE row, not just the name column",
+   "filterUnsupportedOn": [
+    "/v2/security/users"
+   ],
+   "namesParamInstead": "/v2/security/users takes names=a,b or names=* (also capped at 1000)"
+  },
+  "statusCodes": {
+   "drift": "D-11",
+   "rule": "The same logical condition maps to different HTTP codes per endpoint - never branch on status alone.",
+   "examples": {
+    "already exists": {
+     "POST /v2/database-dir/mount": "409 AlreadyMounted (19)",
+     "POST /v2/security/user": "500 UserAlreadyExists (837)"
+    },
+    "not found": {
+     "GET /v2/security/user": "404 UserDoesNotExist (838)",
+     "DELETE /v2/lock": "500 GeneralError (5001)"
+    }
+   },
+   "knownIds": {
+    "837": "UserAlreadyExists",
+    "838": "UserDoesNotExist",
+    "19": "AlreadyMounted",
+    "6046": "DatabaseDoesNotExist",
+    "40300": "MissingQueryParam",
+    "40301": "MissingRequestBodyField",
+    "40308": "RequestBodyFieldShouldBeObject",
+    "845": "UserPasswordInvalidFormat",
+    "7206": "DTNotBoolean",
+    "5809": "LoadObjectNotFound",
+    "5002": "ObjectScriptError",
+    "736": "NotMirrorMember"
+   }
+  },
+  "privilegeAnnotations": {
+   "rule": "The (%Priv:U) annotation is a LOWER BOUND, not a sufficient condition. Show it as 'requires at least'; the verdict is the live 403.",
+   "regex": "\\((%[A-Za-z_][A-Za-z0-9_]*):([RWU]+)\\)",
+   "regexWarning": "The same regex WITHOUT digits ([A-Za-z_]+) silently drops all 24 %Admin_OAuth2_* operations. Use the pattern above.",
+   "annotatedOperations": 254,
+   "unannotatedOperations": 22,
+   "insufficientExamples": {
+    "GET /v2/monitor/system-usage": "declares %Admin_Operate:U - also needs %DB_IRISSYS:R",
+    "GET /v2/monitor/dashboard/main": "declares %Admin_Operate:U - also needs %DB_IRISSYS:R",
+    "GET /v2/processes": "declares %Admin_Operate:U - actually needs %Admin_Manage:U",
+    "GET /v2/databases": "no annotation - needs %Admin_Manage:U",
+    "GET /v2/journal/settings": "no annotation - needs %Admin_Manage:U"
+   },
+   "twoKindsOf403": {
+    "privilegeDenial": "envelope with EMPTY errors array",
+    "protectDenial": "ObjectScriptError 5002 <PROTECT> - a database resource is missing, not a privilege; leaks internal routine names and paths, so never surface it raw"
+   },
+   "effectivePrivileges": "GET /info -> result.privileges is the live map for the current user - use it to gate the UI"
+  },
+  "referentialValidation": {
+   "drift": "D-12",
+   "rule": "preCheck: roleExists - the API does NOT validate references.",
+   "evidence": "POST /v2/security/user with Roles:[\"%NoSuchRole_XYZ\"] returns 201 Created and stores the bogus role",
+   "mitigation": "Validate role names against security.roles.list before any create/update that sets Roles."
+  },
+  "requestBodyShape": {
+   "rule": "Roles and EscalationRoles are ARRAYS. Passing a string returns 400 RequestBodyFieldShouldBeObject (40308).",
+   "createUserBody": "{\"User\":{...}, \"Password\":\"...\"} with the name in the query string",
+   "changePasswordField": "NewPassword (not Password)",
+   "taskRunBody": "{\"RunNow\": true}",
+   "malformedJson": "a body that is not valid JSON is not reported as a parse error - it comes back as 40301 MissingRequestBodyField per required field"
+  },
+  "emptyPostBody": {
+   "drift": "D-14",
+   "rule": "Always send a body on POST and PUT, even an empty object: operations whose arguments are all query parameters otherwise fail.",
+   "evidence": "POST /v2/task/suspend?id=12 with no body -> 400 PostedDataNoContent (16003); the same call with {} -> 200; POST /v2/task/resume with no body -> 200"
+  },
+  "suspendedFlag": {
+   "drift": "D-15",
+   "rule": "Do not trust Suspended from GET /v2/tasks - it is always false. Read %SYS.Task.Suspended (0 none, 1 left in queue, 2 removed and rescheduled) through the manual tool task.states.",
+   "evidence": "POST /v2/task/suspend -> 200, %SYS.Task.Suspended=1, GET /v2/tasks still reports Suspended=false; GET /v2/task has no such field"
+  }
+ },
+ "operation_patches": {
+  "$comment": "JSON-Patch-style corrections applied per operation before schema generation.",
+  "GET /v2/web-app": {
+   "drift": "D-04",
+   "patch": [
+    {
+     "op": "remove",
+     "path": "/responses/200/.../Type",
+     "reason": "declared in the spec, never returned by the instance"
+    },
+    {
+     "op": "replace",
+     "path": "/responses/200/.../WSGIType/type",
+     "value": "string",
+     "reason": "spec says integer, instance returns a string"
+    }
+   ]
+  },
+  "GET /v2/processes": {
+   "drift": "D-03",
+   "patch": [
+    {
+     "op": "rename",
+     "path": "/responses/200/.../EXEName",
+     "value": "EXEname",
+     "reason": "spec spells EXEName, the instance returns EXEname - differs only in the case of the N"
+    }
+   ]
+  },
+  "GET /v2/security/oauth2/client/client-configurations": {
+   "note": "serverId is required (spec agrees). A call without it returns 400 MissingQueryParam - surface it as a required field in the UI, not as an error."
+  },
+  "GET /v2/async-result": {
+   "drift": "D-05",
+   "patch": [
+    {
+     "op": "remove",
+     "path": "/responses/200/.../GUID",
+     "reason": "AsyncTaskBase declares GUID but the single-task response omits it; carry the GUID we captured from LOCATION instead"
+    }
+   ]
+  }
+ },
+ "excluded": {
+  "$comment": "Declared in the spec but deliberately NOT generated.",
+  "POST /v2/security/oauth2/revoke": {
+   "drift": "D-10",
+   "reason": "declared in mainspec_v2.json but absent from the instance's own spec - do not generate"
+  },
+  "/v1/*": {
+   "drift": "D-08",
+   "reason": "170 undocumented v1 operations live on the instance; we use none of them, except the URL handed to us in the LOCATION header"
+  }
+ },
+ "open_questions": [
+  "OAuth2ServerDefinition vs observed ServerDefinition - reported in the neighbouring entry (agammann/iris-workbench); NOT reproduced on our instance yet. Verify before relying on it, then record it here."
+ ]
+}

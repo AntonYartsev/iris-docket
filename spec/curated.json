@@ -1,0 +1,986 @@
+{
+  "$comment": [
+    "Curated subset of the SysAdmin API driving the generated tool registry.",
+    "Key is \"METHOD path\" because mainspec_v2.json declares no operationId (0 of 276).",
+    "Validated against spec/mainspec_v2.json (sha256 in spec/mainspec_v2.sha256) and",
+    "executed live against intersystemsdc/iris-community:2026.2 on 2026-09-16.",
+    "Generator: tools/gen_registry.py . Do not hand-edit generated classes; edit this file."
+  ],
+  "spec": "spec/mainspec_v2.json",
+  "spec_sha256": "1ab154c7c5d9b25e6b227944a44a120c670686f876c2e14abfb9ee5898596650",
+  "operations": {
+    "GET /info": {
+      "tool": "admin.info",
+      "category": "general",
+      "title": "Instance info and effective privileges of the current user",
+      "mutating": false,
+      "privilege": null,
+      "required_params": [],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "401",
+        "403"
+      ],
+      "async": false
+    },
+    "GET /v2/security/users": {
+      "tool": "security.users.list",
+      "category": "security",
+      "title": "List users",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [],
+      "optional_params": [
+        "names",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/user": {
+      "tool": "security.user.get",
+      "category": "security",
+      "title": "View a user",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/security/user": {
+      "tool": "security.user.create",
+      "category": "security",
+      "title": "Create a user",
+      "mutating": true,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "201",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "PUT /v2/security/user": {
+      "tool": "security.user.update",
+      "category": "security",
+      "title": "Edit a user",
+      "mutating": true,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "DELETE /v2/security/user": {
+      "tool": "security.user.delete",
+      "category": "security",
+      "title": "Delete a user",
+      "mutating": true,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/security/user/password": {
+      "tool": "security.user.password",
+      "category": "security",
+      "title": "Change a user's password",
+      "mutating": true,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/roles": {
+      "tool": "security.roles.list",
+      "category": "security",
+      "title": "List roles",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [],
+      "optional_params": [
+        "filter",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/role": {
+      "tool": "security.role.get",
+      "category": "security",
+      "title": "View a role",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/role/owners": {
+      "tool": "security.role.owners",
+      "category": "security",
+      "title": "Who holds a role, directly or as an escalation role",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "PUT /v2/security/role": {
+      "tool": "security.role.save",
+      "category": "security",
+      "title": "Create or edit a role",
+      "mutating": true,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "201",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/resources": {
+      "tool": "security.resources.list",
+      "category": "security",
+      "title": "List resources",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [],
+      "optional_params": [
+        "names",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/web-apps": {
+      "tool": "webapp.list",
+      "category": "web-app",
+      "title": "List web applications",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [],
+      "optional_params": [
+        "filter",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/web-app": {
+      "tool": "webapp.get",
+      "category": "web-app",
+      "title": "View a web application",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "PUT /v2/web-app": {
+      "tool": "webapp.update",
+      "category": "web-app",
+      "title": "Edit a web application",
+      "mutating": true,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "name"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "201",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/tasks": {
+      "tool": "task.list",
+      "category": "task",
+      "title": "List tasks",
+      "mutating": false,
+      "privilege": null,
+      "required_params": [],
+      "optional_params": [
+        "filter",
+        "onDemand",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/task": {
+      "tool": "task.get",
+      "category": "task",
+      "title": "View a task",
+      "mutating": false,
+      "privilege": null,
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/task/history": {
+      "tool": "task.history",
+      "category": "task",
+      "title": "Task run history",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [],
+      "optional_params": [
+        "taskId",
+        "filter",
+        "userOnly",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/task/run": {
+      "tool": "task.run",
+      "category": "task",
+      "title": "Run a task now",
+      "mutating": true,
+      "privilege": "%Admin_Task:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/task/suspend": {
+      "tool": "task.suspend",
+      "category": "task",
+      "title": "Suspend a task",
+      "mutating": true,
+      "privilege": "%Admin_Task:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/task/resume": {
+      "tool": "task.resume",
+      "category": "task",
+      "title": "Resume a task",
+      "mutating": true,
+      "privilege": "%Admin_Task:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/processes": {
+      "tool": "process.list",
+      "category": "os",
+      "title": "List processes",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [],
+      "optional_params": [
+        "filter",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/process": {
+      "tool": "process.get",
+      "category": "os",
+      "title": "View a process",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/devices": {
+      "tool": "device.list",
+      "category": "os",
+      "title": "List devices",
+      "mutating": false,
+      "privilege": "%Admin_Manage:U",
+      "required_params": [],
+      "optional_params": [
+        "names",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/database-dirs": {
+      "tool": "databaseDir.list",
+      "category": "os",
+      "title": "List local database directories",
+      "mutating": false,
+      "privilege": null,
+      "required_params": [],
+      "optional_params": [
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/database-dir/mount": {
+      "tool": "databaseDir.mount",
+      "category": "os",
+      "title": "Mount a local database",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "dir"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "409",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/monitor/system-usage": {
+      "tool": "monitor.systemUsage",
+      "category": "os",
+      "title": "System usage counters",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/process/suspend": {
+      "tool": "process.suspend",
+      "category": "os",
+      "title": "Suspend a process",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/process/resume": {
+      "tool": "process.resume",
+      "category": "os",
+      "title": "Resume a process",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/process/terminate": {
+      "tool": "process.terminate",
+      "category": "os",
+      "title": "Terminate a process",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/database-dir/info": {
+      "tool": "databaseDir.info",
+      "category": "os",
+      "title": "Block size, free space and the rest of what is not configurable (async)",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "dir"
+      ],
+      "optional_params": [],
+      "responses": [
+        "202",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": true
+    },
+    "POST /v2/database-dir/dismount": {
+      "tool": "databaseDir.dismount",
+      "category": "os",
+      "title": "Dismount a local database",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "dir"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/monitor/dashboard/main": {
+      "tool": "monitor.dashboard",
+      "category": "os",
+      "title": "Dashboard stats: uptime, alerts, licence use, write daemon",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/journal/settings": {
+      "tool": "journal.settings",
+      "category": "journal",
+      "title": "Journal settings",
+      "mutating": false,
+      "privilege": null,
+      "required_params": [],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/journal/files": {
+      "tool": "journal.files",
+      "category": "journal",
+      "title": "List journal files",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [],
+      "optional_params": [
+        "mirror",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "422",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/journal/switch-file": {
+      "tool": "journal.switchFile",
+      "category": "journal",
+      "title": "Switch the journal file",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/async-results": {
+      "tool": "async.list",
+      "category": "async",
+      "title": "List my async tasks",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [],
+      "optional_params": [
+        "start",
+        "end",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/async-result": {
+      "tool": "async.get",
+      "category": "async",
+      "title": "View an async task",
+      "mutating": false,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/async-result/pause": {
+      "tool": "async.pause",
+      "category": "async",
+      "title": "Pause an async task",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "409",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/async-result/resume": {
+      "tool": "async.resume",
+      "category": "async",
+      "title": "Resume an async task",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "409",
+        "500"
+      ],
+      "async": false
+    },
+    "POST /v2/async-result/cancel": {
+      "tool": "async.cancel",
+      "category": "async",
+      "title": "Cancel an async task",
+      "mutating": true,
+      "privilege": "%Admin_Operate:U",
+      "required_params": [
+        "id"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "409",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/wallet/collections": {
+      "tool": "secrets.wallet.collections",
+      "category": "secrets",
+      "title": "List wallet collections",
+      "mutating": false,
+      "privilege": "%Admin_Wallet:U",
+      "required_params": [],
+      "optional_params": [
+        "names",
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/ssl-configurations": {
+      "tool": "secrets.tls.list",
+      "category": "secrets",
+      "title": "List TLS/SSL configurations",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [],
+      "optional_params": [
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/oauth2/client/server-definitions": {
+      "tool": "secrets.oauth2.servers",
+      "category": "secrets",
+      "title": "List OAuth2 authorization servers this instance uses as a client",
+      "mutating": false,
+      "privilege": "%Admin_OAuth2_Client:U",
+      "required_params": [],
+      "optional_params": [
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/oauth2/client/client-configurations": {
+      "tool": "secrets.oauth2.list",
+      "category": "secrets",
+      "title": "List OAuth2 client configurations",
+      "mutating": false,
+      "privilege": "%Admin_OAuth2_Client:U",
+      "required_params": [
+        "serverId"
+      ],
+      "optional_params": [
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/x509-credentials": {
+      "tool": "secrets.x509.list",
+      "category": "secrets",
+      "title": "List X.509 credentials",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [],
+      "optional_params": [
+        "maxRows"
+      ],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "500"
+      ],
+      "async": false
+    },
+    "GET /v2/security/x509-credential/certificate": {
+      "tool": "secrets.x509.certificate",
+      "category": "secrets",
+      "title": "View the certificate of an X.509 credential: subject, issuer, validity",
+      "mutating": false,
+      "privilege": "%Admin_Secure:U",
+      "required_params": [
+        "alias"
+      ],
+      "optional_params": [],
+      "responses": [
+        "200",
+        "400",
+        "401",
+        "403",
+        "404",
+        "500"
+      ],
+      "async": false
+    }
+  },
+  "composite": {
+    "$comment": "No endpoint grants or revokes a USER role: the only grant/revoke paths in the spec are for SQL privileges. Roles are a whole-array replace on PUT /v2/security/user, so these two are read-modify-write composites and carry a lost-update risk. Declared here, implemented by hand, NOT generated.",
+    "security.user.grantRole": {
+      "category": "security",
+      "title": "Grant a role to a user",
+      "mutating": true,
+      "privilege": "%Admin_Secure:U",
+      "steps": [
+        "GET /v2/security/user?name=",
+        "add role to result.Roles",
+        "PUT /v2/security/user?name="
+      ],
+      "risk": "lost update - concurrent edits to the same user overwrite each other",
+      "preCheck": "roleExists"
+    },
+    "security.user.revokeRole": {
+      "category": "security",
+      "title": "Revoke a role from a user",
+      "mutating": true,
+      "privilege": "%Admin_Secure:U",
+      "steps": [
+        "GET /v2/security/user?name=",
+        "remove role from result.Roles",
+        "PUT /v2/security/user?name="
+      ],
+      "risk": "lost update - concurrent edits to the same user overwrite each other",
+      "preCheck": "roleExists"
+    }
+  },
+  "manual": {
+    "$comment": "Holes in the official API - implemented by hand over %SYS / /api/mgmnt / /api/monitor. Not generated from the spec.",
+    "rest.services": "/api/mgmnt/ - discovery of REST applications (spec has no equivalent)",
+    "rest.spec": "/api/mgmnt/v1/%SYS/spec/<app> - the app's own Swagger 2.0 document",
+    "rest.probe": "trial call against a discovered REST endpoint",
+    "logs.messages": "messages.log via %Stream.FileCharacter",
+    "logs.alerts": "alerts.log via %Stream.FileCharacter",
+    "logs.ens": "Ens.Util.Log (IRIS for Health only)",
+    "logs.poll": "long-polling tail for the log screen (SSE does not work on this stack)",
+    "monitor.metrics": "/api/monitor/metrics - host CPU/memory, unauthenticated",
+    "security.user.effective": "$SYSTEM.Security.GetUserRecursedRoleSet(user,.roles) - byref, returns %Status",
+    "ens.productions": "Ens.Director",
+    "ens.messages.search": "Ens.MessageHeader",
+    "policy.simulate": "dry-run of the policy engine",
+    "audit.verifyChain": "verify the portal's own audit hash chain",
+    "audit.export": "the whole journal in the form the digests were taken over (public/verify.html)",
+    "findings.run": "health checks"
+  }
+}

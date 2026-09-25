@@ -1,0 +1,26 @@
+name: spec-registry
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Spec matches its pinned SHA256
+        working-directory: spec
+        run: sha256sum -c mainspec_v2.sha256
+
+      - name: Spec statistics
+        run: python3 tools/gen_registry.py --stats
+
+      - name: Generated classes are up to date
+        run: python3 tools/gen_registry.py --check

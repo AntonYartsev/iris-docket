@@ -1,0 +1,16 @@
+name: objectscript-quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ObjectScript Quality
+        uses: intersystems-community/objectscript-quality-action@v1
+        continue-on-error: true

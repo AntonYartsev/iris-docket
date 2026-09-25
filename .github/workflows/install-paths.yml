@@ -1,0 +1,86 @@
+name: install-paths
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  image:
+    name: docker compose up --build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start
+        run: |
+          cp .env.example .env
+          docker compose up --build -d --wait
+
+      - name: The portal answers and own tests pass
+        run: |
+          curl -fsS -u 'docket:12345' localhost:52773/portal/api/info | grep -q serverVersion
+          docker compose exec -T iris iris session IRIS -U%SYS <<'EOF' | tee tests.log
+          do ##class(App.UnitTest.Runner).All()
+          halt
+          EOF
+          grep -q "UNIT TESTS: PASSED" tests.log
+
+      - name: Logs
+        if: failure()
+        run: docker compose logs
+
+  module:
+    name: zpm load, on an instance without node
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: The committed dist/ is not older than the UI it is built from
+        run: |
+          ui=$(git log -1 --format=%ct -- index.html vite.config.js package-lock.json public src ':(exclude)src/App' ':(exclude)src/Demo')
+          built=$(git log -1 --format=%ct -- dist)
+          test -n "$built" && test "$built" -ge "$ui" || {
+            echo "dist/ was committed before the last UI change: run npm run build and commit dist/"
+            exit 1
+          }
+
+      - name: A stock instance, nothing built on it
+        run: |
+          docker run -d --name iris -p 52773:52773 \
+            -e IRIS_INIT=1 \
+            -e IRIS_PASSWORD='12345' \
+            -e IRIS_ADMIN_USER=_SYSTEM \
+            -e IRIS_ADMIN_PASSWORD='12345' \
+            -v "$PWD:/home/irisowner/repo" \
+            intersystemsdc/irishealth-community:2026.2
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null localhost:52773/csp/sys/UtilHome.csp && break
+            sleep 5
+          done
+
+      - name: zpm load, then the module's own test phase
+        run: |
+          docker exec -i iris iris session IRIS -U%SYS <<'EOF' | tee load.log
+          do ##class(%IPM.Main).Shell("load /home/irisowner/repo")
+          do ##class(%IPM.Main).Shell("docket test")
+          halt
+          EOF
+          grep -q "Activate SUCCESS" load.log
+          grep -q "UNIT TESTS: PASSED" load.log
+          grep -q "Test SUCCESS" load.log
+
+      - name: The committed bundle is the one being served
+        run: |
+          curl -fsS -u '_SYSTEM:12345' localhost:52773/portal/api/info | grep -q serverVersion
+          asset=$(curl -fsS localhost:52773/portal/index.html | grep -o '/portal/assets/[^"]*\.js' | head -1)
+          curl -fsS -o /dev/null "localhost:52773$asset"
+
+      - name: Logs
+        if: failure()
+        run: docker logs iris

@@ -1,0 +1,297 @@
+@import "tailwindcss";
+
+/* dont scan dist, stale tokens */
+@source not "../../dist";
+
+@theme {
+  --font-ui: Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --text-micro: 0.8125rem;
+  --text-micro--line-height: 1.54;
+
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.57;
+
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.53;
+  --text-body--letter-spacing: -0.0125em;
+
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.5;
+  --text-lead--letter-spacing: -0.0125em;
+
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.5;
+  --text-title--letter-spacing: -0.0125em;
+
+  --text-screen: 1.5rem;
+  --text-screen--line-height: 1.42;
+  --text-screen--letter-spacing: -0.0268em;
+
+  --text-display: 1.75rem;
+  --text-display--line-height: 1.36;
+  --text-display--letter-spacing: -0.0268em;
+
+  --color-base: oklch(13% 0.028 261.692);
+  --color-inset: oklch(16.5% 0.03 262.5);
+  --color-surface: oklch(21% 0.034 264.665);
+  --color-surface-raised: oklch(27.8% 0.033 256.848);
+
+  --color-line: oklch(27.8% 0.033 256.848 / 0.8);
+  --color-line-strong: oklch(37.3% 0.034 259.733);
+
+  --color-text: oklch(92.8% 0.006 264.531);
+  --color-text-muted: oklch(87% 0.065 274.039 / 0.65);
+  --color-text-dim: oklch(44.6% 0.03 256.802);
+  --color-text-bright: oklch(98.5% 0.002 247.839);
+
+  --color-accent: oklch(58.5% 0.233 277.117);
+  --color-accent-hover: oklch(51.1% 0.262 276.966);
+  --color-accent-soft: oklch(58.5% 0.233 277.117 / 0.25);
+
+  --color-allow: oklch(76.5% 0.177 163.223);
+  --color-allow-soft: oklch(76.5% 0.177 163.223 / 0.25);
+  --color-confirm: oklch(82.8% 0.189 84.429);
+  --color-confirm-soft: oklch(82.8% 0.189 84.429 / 0.25);
+  --color-deny: oklch(70.4% 0.191 22.216);
+  --color-deny-soft: oklch(70.4% 0.191 22.216 / 0.25);
+  --color-info: oklch(58.5% 0.233 277.117);
+  --color-info-soft: oklch(58.5% 0.233 277.117 / 0.25);
+
+  --radius-tight: 4px;
+  --radius-control: 8px;
+  --radius-card: 16px;
+  --radius-badge: 9999px;
+
+  --shadow-edge: inset 0 1px 0 0 rgb(255 255 255 / 0.16);
+  --shadow-overlay: 0 16px 48px -12px rgb(0 0 0 / 0.6);
+
+  --spacing-zone: 10px;
+  --spacing-panel: 9px;
+  --spacing-cell-y: 6px;
+  --spacing-cell-x: 10px;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-base);
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  table,
+  code,
+  kbd,
+  samp,
+  pre {
+    font-variant-numeric: tabular-nums;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+}
+
+:root {
+  --size-ribbon: 44px;
+  --size-nav: 200px;
+  --size-nav-shut: 52px;
+  --size-detail: 300px;
+
+  --size-row: 30px;
+  --size-field: 30px;
+  --size-btn: 32px;
+  --size-btn-lg: 34px;
+  --size-panel-head: 30px;
+  --size-panel-foot: 26px;
+  --size-icon: 16px;
+}
+
+@layer base {
+  /* page never scrolls, panels do */
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  option {
+    background-color: var(--color-inset);
+    color: var(--color-text);
+  }
+
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-raised);
+    border-radius: var(--radius-badge);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  /* else chrome paints it white */
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@keyframes portal-number {
+  0% {
+    opacity: 0.4;
+    transform: translateY(-3px);
+  }
+  55% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes portal-trail {
+  0% {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+}
+@keyframes portal-arrive {
+  0% {
+    background: var(--color-accent-soft);
+  }
+  100% {
+    background: transparent;
+  }
+}
+@keyframes portal-skeleton {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+@keyframes portal-poll {
+  0% {
+    opacity: 1;
+    animation-timing-function: linear;
+  }
+  92% {
+    opacity: 0.12;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes portal-reach-draw {
+  0% {
+    stroke-dasharray: 0 2400;
+  }
+  100% {
+    stroke-dasharray: 2400 0;
+  }
+}
+
+@utility animate-number {
+  animation: portal-number 780ms ease-out;
+}
+@utility animate-arrive {
+  animation: portal-arrive 2.4s ease-out forwards;
+}
+@utility animate-skeleton {
+  animation: portal-skeleton 1.4s ease-in-out infinite;
+}
+@utility animate-poll {
+  animation: portal-poll 10s linear forwards; /* overriden inline per poll */
+}
+@utility animate-reach-draw {
+  animation: portal-reach-draw 520ms ease-out;
+}
+
+[data-zone="nav"],
+[data-zone="brand"] {
+  width: var(--size-nav);
+  transition: width 0.14s ease;
+}
+[data-zone="detail"] {
+  width: var(--size-detail);
+}
+
+[data-zone="nav"][data-shut="1"],
+[data-zone="brand"][data-shut="1"] {
+  width: var(--size-nav-shut);
+}
+[data-zone="nav"][data-shut="1"] [data-nav-label],
+[data-zone="brand"][data-shut="1"] [data-nav-label] {
+  display: none;
+}
+[data-zone="brand"][data-shut="1"] {
+  justify-content: center;
+  padding-left: 0;
+}
+[data-zone="nav"][data-shut="1"] [data-nav-item],
+[data-zone="nav"][data-shut="1"] [data-nav-foot] {
+  justify-content: center;
+  padding: 0;
+  gap: 0;
+}
+
+[data-collapse] svg {
+  transition: transform 0.14s ease;
+}
+[data-zone="nav"][data-shut="1"] [data-collapse] svg {
+  transform: scaleX(-1);
+}
+
+/* same specificity, later rule wins */
+@media (max-width: 1279px) {
+  [data-zone="nav"],
+  [data-zone="brand"] {
+    width: var(--size-nav-shut);
+  }
+  [data-zone="nav"] [data-nav-label],
+  [data-zone="brand"] [data-nav-label] {
+    display: none;
+  }
+  [data-zone="brand"] {
+    justify-content: center;
+    padding-left: 0;
+  }
+  [data-zone="nav"] [data-nav-item],
+  [data-zone="nav"] [data-nav-foot] {
+    justify-content: center;
+    padding: 0;
+    gap: 0;
+  }
+  [data-zone="detail"] {
+    width: 260px;
+  }
+  [data-zone="nav"] [data-collapse] svg {
+    transform: scaleX(-1);
+  }
+}
