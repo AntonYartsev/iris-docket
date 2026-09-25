@@ -3,8 +3,8 @@
 Management portal for InterSystems IRIS. Every operation, from a screen, the agent or a script,
 goes through one policy and lands in one hash-chained journal.
 
-[![Quality Gate Status](https://community.objectscriptquality.com/api/project_badges/measure?project=intersystems_iris_community%2Fis-docket&metric=alert_status)](https://community.objectscriptquality.com/dashboard?id=intersystems_iris_community%2Fis-docket)
-[![install-paths](https://github.com/AntonYartsev/is-docket/actions/workflows/install-paths.yml/badge.svg)](https://github.com/AntonYartsev/is-docket/actions/workflows/install-paths.yml)
+[![Quality Gate Status](https://community.objectscriptquality.com/api/project_badges/measure?project=intersystems_iris_community%2Firis-docket&metric=alert_status)](https://community.objectscriptquality.com/dashboard?id=intersystems_iris_community%2Firis-docket)
+[![install-paths](https://github.com/AntonYartsev/iris-docket/actions/workflows/install-paths.yml/badge.svg)](https://github.com/AntonYartsev/iris-docket/actions/workflows/install-paths.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ![Dashboard](screenshots/dashboard.png)

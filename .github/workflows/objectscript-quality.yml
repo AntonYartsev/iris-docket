@@ -3,14 +3,12 @@ name: objectscript-quality
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: ObjectScript Quality
-        uses: intersystems-community/objectscript-quality-action@v1
+        run: wget https://raw.githubusercontent.com/litesolutions/objectscriptquality-jenkins-integration/master/iris-community-hook.sh && sh ./iris-community-hook.sh
         continue-on-error: true
