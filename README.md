@@ -1,11 +1,15 @@
-# Docket
+<h1 align="center"><img src="screenshots/icon.svg" height="21.5" alt=""> Docket</h1>
 
+<p align="center">
 Management portal for InterSystems IRIS. Every operation, from a screen, the agent or a script,
 goes through one policy and lands in one hash-chained journal.
+</p>
 
-[![Quality Gate Status](https://community.objectscriptquality.com/api/project_badges/measure?project=intersystems_iris_community%2Firis-docket&metric=alert_status)](https://community.objectscriptquality.com/dashboard?id=intersystems_iris_community%2Firis-docket)
-[![install-paths](https://github.com/AntonYartsev/iris-docket/actions/workflows/install-paths.yml/badge.svg)](https://github.com/AntonYartsev/iris-docket/actions/workflows/install-paths.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/AntonYartsev/iris-docket/actions/workflows/install-paths.yml"><img src="https://github.com/AntonYartsev/iris-docket/actions/workflows/install-paths.yml/badge.svg" alt="install-paths"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/made%20with-%E2%9D%A4-ff69b4.svg" alt="made with love">
+</p>
 
 ![Dashboard](screenshots/dashboard.png)
 
@@ -177,7 +181,7 @@ docker exec -i docket iris session IRIS -U%SYS "##class(App.UnitTest.Runner).All
 `/api/admin` error shapes, and a grep that nothing but `App.Tools.Invoker` calls `Execute()`.
 
 CI: `install-paths` (docker + zpm on a clean instance), `spec-registry` (SHA pin, generated classes
-up to date), ObjectScript Quality.
+up to date).
 
 ## Prior art
 
