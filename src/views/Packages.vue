@@ -13,6 +13,7 @@ const { invoke } = useToolInvoke();
 const installed = shallowRef([]);
 const ipm = ref(true);
 const unreadable = shallowRef([]);
+const blocked = shallowRef({});
 const available = shallowRef([]);
 const jobs = shallowRef([]);
 const filter = ref("");
@@ -36,6 +37,7 @@ async function load() {
     installed.value = left.value.data.modules;
     ipm.value = left.value.data.ipm;
     unreadable.value = left.value.data.unreadable ?? [];
+    blocked.value = left.value.data.blocked ?? {};
     states.installed = "ready";
   } else {
     installed.value = [];
@@ -291,6 +293,7 @@ const availableColumns = [
       :registry="published.get(pkg) ?? null"
       :registry-out="state.available !== 'ready'"
       :namespaces="namespaces"
+      :blocked="blocked"
       :jobs="jobs"
       @started="follow"
       @close="selected = ''"

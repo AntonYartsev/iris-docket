@@ -122,6 +122,47 @@ Method TestAJobRunsInTheBackgroundAsTheCaller()
 	do ..Rewind(mark)
 }
 
+Method TestIpmIsRefusedWhereItCannotWrite()
+{
+	set mark = ..Mark()
+	try {
+		do ##class(%SYS.Namespace).ListAll(.list)
+		set target = "", ns = ""
+		for {
+			set ns = $order(list(ns))
+			quit:ns=""
+			continue:'##class(App.Tools.Packages.Change).HasIpm(ns)
+			if ##class(App.Tools.Packages.Change).Unwritable(ns) '= "" {
+				set target = ns
+				quit
+			}
+		}
+		if target = "" {
+			do $$$LogMessage("every namespace that sees IPM can also write its state - nothing to refuse here")
+		} else {
+			set args = {"name": "docket-no-such-package", "namespace": (target)}
+			set code = "", message = "", token = ""
+			for attempt = 1, 2 {
+				try {
+					do ##class(App.Tools.Invoker).Run("packages.install", args, "user:unittest", "ui", token)
+				} catch ex {
+					set code = ex.Name, message = ex.Data
+					set:$isobject(ex.Detail) token = ex.Detail.%Get("confirmToken")
+				}
+				quit:code'="confirm_required"
+			}
+			do $$$AssertEquals(code, "bad_request", target_" is refused up front, not queued to die inside IPM with <PROTECT>")
+			do $$$AssertTrue(message [ target, "and the refusal names the namespace: "_message)
+
+			set blocked = ##class(App.Tools.Invoker).Run("packages.installed", {}, "user:unittest").data.blocked
+			do $$$AssertTrue(blocked.%IsDefined(target), "packages.installed tells the UI the same thing, so it never offers "_target)
+		}
+	} catch ex {
+		do $$$AssertTrue(0, "unexpected error: "_ex.DisplayString())
+	}
+	do ..Rewind(mark)
+}
+
 ClassMethod Job(id As %String) As %DynamicObject
 {
 	set it = ##class(App.Tools.Invoker).Run("packages.jobs", {}, "user:unittest").data.%GetIterator()

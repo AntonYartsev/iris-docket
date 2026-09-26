@@ -20,6 +20,7 @@ docker compose up --build
 ```
 
 Open <http://localhost:52773/portal/index.html>, login `docket` / `12345`.
+- packages screen: login `_SYSTEM` / `12345`. A package runs its own code with full rights on install, so IPM needs `%All`, and `docket` does not hold it by design.
 - port busy? `IRIS_PORT=52780 docker compose up --build`
 - first build is slow, give Docker 4 GB+
 - agent plays a recorded scenario by default (`LLM_MODE=mock`). For a real model set `LLM_MODE=live`

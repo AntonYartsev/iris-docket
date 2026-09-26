@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useToolInvoke } from "../composables/useToolInvoke";
+import { info } from "../composables/useShell";
 import DetailPanel from "./DetailPanel.vue";
 import FieldGrid from "./FieldGrid.vue";
 import PackageRuns from "./PackageRuns.vue";
@@ -11,6 +12,7 @@ const props = defineProps({
   registry: { type: Object, default: null },
   registryOut: { type: Boolean, default: false },
   namespaces: { type: Array, default: () => [] },
+  blocked: { type: Object, default: () => ({}) },
   jobs: { type: Array, default: () => [] },
 });
 const emit = defineEmits(["close", "started"]);
@@ -30,10 +32,19 @@ const about = computed(() =>
   (props.registry?.description || props.installed[0]?.description || "").replace(/\s+/g, " ").trim(),
 );
 
+// IPM needs %All; the portal never raises its own privileges
+const superuser = computed(() => (info.value?.portal?.roles ?? "").split(",").includes("%All"));
+
 const ns = ref("");
 watch(
   () => props.name,
-  () => (ns.value = props.installed[0]?.namespace ?? props.namespaces[0] ?? "USER"),
+  () =>
+    (ns.value =
+      props.installed[0]?.namespace ??
+      (props.namespaces.includes("USER") && !props.blocked.USER
+        ? "USER"
+        : props.namespaces.find((n) => !props.blocked[n])) ??
+      "USER"),
   { immediate: true },
 );
 
@@ -48,7 +59,7 @@ const runs = computed(() => props.jobs.filter((j) => j.package === props.name));
 const btn =
   "h-[var(--size-btn)] rounded-control border border-line-strong px-[11px] text-small text-text transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40";
 const primary =
-  "h-[var(--size-btn)] rounded-control bg-accent px-[11px] text-small font-semibold text-text-bright shadow-edge transition-colors hover:bg-accent-hover";
+  "h-[var(--size-btn)] rounded-control bg-accent px-[11px] text-small font-semibold text-text-bright shadow-edge transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40";
 </script>
 
 <template>
@@ -107,8 +118,11 @@ const primary =
           v-model="ns"
           class="h-[var(--size-field)] w-full rounded-control border border-line-strong bg-base px-2 font-mono text-small text-text"
         >
-          <option v-for="n in namespaces" :key="n" :value="n">{{ n }}</option>
+          <option v-for="n in namespaces" :key="n" :value="n" :disabled="!!blocked[n]" :title="blocked[n] ?? ''">
+            {{ n }}{{ blocked[n] ? " - not writable for IPM" : "" }}
+          </option>
         </select>
+        <span v-if="blocked[ns]" class="mt-1 block text-micro text-deny">{{ blocked[ns] }}</span>
       </label>
       <label class="mb-2 block">
         <span class="mb-1 flex items-baseline gap-2 text-micro text-text-muted">
@@ -124,6 +138,7 @@ const primary =
       <div class="flex flex-wrap gap-1.5">
         <button
           v-if="!mine"
+          :disabled="!superuser"
           :class="primary"
           title="Runs the package manager's install in the chosen namespace. The policy asks first, and the journal keeps the name and the version."
           @click="act('packages.install', version ? { version } : {})"
@@ -132,6 +147,7 @@ const primary =
         </button>
         <button
           v-if="mine"
+          :disabled="!superuser"
           :class="mine.behind ? primary : btn"
           :title="
             mine.behind
@@ -144,6 +160,7 @@ const primary =
         </button>
         <button
           v-if="mine"
+          :disabled="!superuser"
           :class="btn"
           title="Removes it from this namespace. IPM refuses by itself if another installed module depends on it."
           @click="act('packages.uninstall')"
@@ -151,6 +168,10 @@ const primary =
           Uninstall
         </button>
       </div>
+      <p v-if="!superuser" class="mt-2 text-micro text-deny">
+        Signed in as {{ info?.user }} without %All. A package runs its own code with full rights when it installs, so IPM
+        needs %All, and the portal does not raise privileges for it. Sign in as an account that holds %All to use these.
+      </p>
       <p class="mt-2 text-micro text-text-muted">
         All three go through the same gate as everything else here: schema, policy, a human click, one journal row. The
         agent console is refused all three outright.

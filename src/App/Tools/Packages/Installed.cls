@@ -21,13 +21,17 @@ XData Schema [ MimeType = application/json ]
 
 ClassMethod Execute(args As %DynamicObject) As %DynamicObject
 {
-	set modules = [], warnings = [], unreadable = [], ipm = 0
+	set modules = [], warnings = [], unreadable = [], blocked = {}, ipm = 0
 	do ##class(%SYS.Namespace).ListAll(.list)
 	set ns = ""
 	for {
 		set ns = $order(list(ns))
 		quit:ns=""
 		set:..Read(ns, modules, .err) ipm = 1
+		if ##class(App.Tools.Packages.Change).HasIpm(ns) {
+			set why = ##class(App.Tools.Packages.Change).Unwritable(ns)
+			do:why'="" blocked.%Set(ns, why)
+		}
 		if err = "<PROTECT>" {
 			do unreadable.%Push(ns)
 		} elseif err '= "" {
@@ -36,7 +40,7 @@ ClassMethod Execute(args As %DynamicObject) As %DynamicObject
 	}
 	do:'ipm warnings.%Push("no namespace on this instance has %IPM.Storage.Module in it - nothing here was installed by a package manager")
 
-	set out = {"data": {"modules": (modules), "unreadable": (unreadable)}, "warnings": (warnings)}
+	set out = {"data": {"modules": (modules), "unreadable": (unreadable), "blocked": (blocked)}, "warnings": (warnings)}
 	do out.data.%Set("ipm", ''ipm, "boolean")
 	return out
 }

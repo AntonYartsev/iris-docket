@@ -44,10 +44,13 @@ ClassMethod Execute(args As %DynamicObject) As %DynamicObject
 {
 	set name = args.%Get("name"), version = args.%Get("version")
 	set ns = $zconvert(args.%Get("namespace"), "U")
+	do:'..Superuser() ##class(App.Err).Throw("admin_forbidden", $username_" does not hold %All. A package runs its own code with full rights when it installs, so IPM needs %All, and the portal does not raise privileges for it: sign in as an account that holds %All")
 	set command = ..#Verb_" "_name_$select(version="": "", 1: " "_version)
 
 	do:'##class(%SYS.Namespace).Exists(ns) ##class(App.Err).Throw("not_found", "no namespace "_ns_" on this instance")
 	do:'..HasIpm(ns) ##class(App.Err).Throw("bad_request", ns_" has no package manager in it: %IPM.Main is not there, so there is nothing to "_..#Verb_" with")
+	set why = ..Unwritable(ns)
+	do:why'="" ##class(App.Err).Throw("bad_request", "IPM cannot "_..#Verb_" in "_ns_": "_why)
 
 	set id = $system.Util.CreateGUID()
 	set job = {}
@@ -189,6 +192,31 @@ ClassMethod Spool() As %String
 ClassMethod Now() As %String
 {
 	return $zdatetime($ztimestamp, 3, 1)
+}
+
+/// %IPM.Main can be visible through an instance-wide package mapping while IPM's own
+/// globals land in the namespace's default database. On IRIS for Health that is HSLIB,
+/// mounted read-only, and IPM dies on its first write with <PROTECT>.
+/// "" means this process can write where IPM keeps its state in ns.
+ClassMethod Unwritable(ns As %String) As %String
+{
+	try {
+		set dir = $piece(##class(%SYS.Namespace).GetGlobalDest(ns, "IPM.General.HistoryD"), "^", 2)
+		new $namespace
+		set $namespace = "%SYS"
+		set db = ##class(SYS.Database).%OpenId(dir)
+		return:'$isobject(db) "its state would go to "_dir_", which is not mounted"
+		return:db.ReadOnly||db.ReadOnlyMounted "its state would go to "_dir_", which is read-only"
+		return:'$system.Security.Check(db.ResourceName, "WRITE") "its state would go to "_dir_", and "_$username_" has no WRITE on "_db.ResourceName
+		return ""
+	} catch e {
+		return "cannot tell where IPM keeps its state here: "_e.DisplayString()
+	}
+}
+
+ClassMethod Superuser() As %Boolean
+{
+	return (","_$roles_",") [ ",%All,"
 }
 
 ClassMethod HasIpm(ns As %String) As %Boolean
