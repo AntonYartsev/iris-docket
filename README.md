@@ -13,8 +13,11 @@ goes through one policy and lands in one hash-chained journal.
 
 ![Dashboard](screenshots/dashboard.png)
 
-## Quick start
+## Live demo
+<https://docket.antonyartsev.com>, login `docket` / `12345`. 
+- This is shared instances, agent in mock mode, packages screen needs `_SYSTEM`, not available here
 
+## Quick start
 ```bash
 docker compose up --build
 ```
