@@ -63,6 +63,9 @@ Only step 3 changes the instance. Reset:
 - **No `%All`.** You login as `docket` with one role, every resource in it measured
 - **Beyond `/api/admin`.** Interop (productions, messages, errors from `Ens`) and Packages (IPM
   against the community registry)
+- **Embedded Python in the call path.** `App.Json` runs in `%SYS.Python`: `jsonschema` checks every
+  tool's arguments before the policy is asked, and the canonical JSON behind
+  the confirm token and the journal hash chain is built there too
 
 ## Screens
 
@@ -169,7 +172,6 @@ reaches the browser. Created only if missing, grant it `DocketOperator`.
 - secrets are read only, by design
 - Interop: read, start, stop. No resend, no config
 - live agent: OpenRouter models with tool calling, tested on `google/gemini-2.5-flash`
-- verified on arm64 only
 - dark desktop layout
 
 ## Tests and CI
@@ -178,7 +180,7 @@ reaches the browser. Created only if missing, grant it `DocketOperator`.
 docker exec -i docket iris session IRIS -U%SYS "##class(App.UnitTest.Runner).All()"
 ```
 
-11 classes, 56 methods: policy, confirm tokens, chain tampering, the export rehashed in Python,
+11 classes, 57 methods: policy, confirm tokens, chain tampering, the export rehashed in Python,
 `/api/admin` error shapes, and a grep that nothing but `App.Tools.Invoker` calls `Execute()`.
 
 CI: `install-paths` (docker + zpm on a clean instance), `spec-registry` (SHA pin, generated classes
