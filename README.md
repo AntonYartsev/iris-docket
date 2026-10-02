@@ -189,6 +189,13 @@ docker exec -i docket iris session IRIS -U%SYS "##class(App.UnitTest.Runner).All
 CI: `install-paths` (docker + zpm on a clean instance), `spec-registry` (SHA pin, generated classes
 up to date).
 
+## Community ideas
+
+- [DPI-I-516](https://ideas.intersystems.com/ideas/DPI-I-516) Integration with LLMs like GPT, llama: the
+  Agent screen, any OpenRouter model with tool calling (GPT, Llama, Claude, Gemini), `App.Agent.Llm`
+- [DPI-I-261](https://ideas.intersystems.com/ideas/DPI-I-261) IRIS and ZPM (Open Exchange) integration:
+  the Packages screen, install / upgrade / uninstall from `pm.community.intersystems.com`, `App.Tools.Packages`
+
 ## Prior art
 
 - `sysadmin-api-specification`: vendored in `spec/`, source of the generated tools
