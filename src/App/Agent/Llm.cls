@@ -7,6 +7,9 @@ Parameter Path = "/api/v1/chat/completions";
 
 Parameter DefaultModel = "anthropic/claude-sonnet-4.5";
 
+/// what the console may switch to, OPENROUTER_MODELS replaces it
+Parameter Models = "anthropic/claude-sonnet-4.5,openai/gpt-4.1-mini,google/gemini-2.5-flash,meta-llama/llama-3.3-70b-instruct";
+
 Parameter MaxTokens = 1500;
 
 ClassMethod Mode() As %String
@@ -25,11 +28,27 @@ ClassMethod Model() As %String
 	return $select(m '= "": m, 1: ..#DefaultModel)
 }
 
-ClassMethod Chat(messages As %DynamicArray, tools As %DynamicArray) As %DynamicObject
+/// the key is the server's, so the browser picks only from this list. Default model always first
+ClassMethod Models() As %DynamicArray
+{
+	set list = $system.Util.GetEnviron("OPENROUTER_MODELS")
+	set:list="" list = ..#Models
+	set out = [(..Model())], seen(..Model()) = ""
+	for i = 1:1:$length(list, ",") {
+		set m = $zstrip($piece(list, ",", i), "<>W")
+		continue:(m="")||$data(seen(m))
+		set seen(m) = ""
+		do out.%Push(m)
+	}
+	return out
+}
+
+ClassMethod Chat(messages As %DynamicArray, tools As %DynamicArray, model As %String = "") As %DynamicObject
 {
 	return:..Mode()="mock" ##class(App.Agent.Mock).Reply(messages)
 
-	set body = {"model": (..Model()), "messages": (messages), "max_tokens": (..#MaxTokens)}
+	set:model="" model = ..Model()
+	set body = {"model": (model), "messages": (messages), "max_tokens": (..#MaxTokens)}
 	do body.%Set("temperature", 0, "number")
 	if $isobject(tools), tools.%Size() {
 		set body.tools = tools
@@ -60,7 +79,7 @@ ClassMethod Chat(messages As %DynamicArray, tools As %DynamicArray) As %DynamicO
 	if rsp.StatusCode '= 200 {
 		set detail = ""
 		set:$isobject(json) detail = $select($isobject(json.%Get("error")): json.error.%Get("message"), 1: "")
-		do ##class(App.Err).Throw("internal", "OpenRouter answered "_rsp.StatusCode_$select(detail = "": "", 1: ": "_detail), {"model": (..Model())})
+		do ##class(App.Err).Throw("internal", "OpenRouter answered "_rsp.StatusCode_$select(detail = "": "", 1: ": "_detail), {"model": (model)})
 	}
 
 	set choices = $select($isobject(json): json.%Get("choices"), 1: "")

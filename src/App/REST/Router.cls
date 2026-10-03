@@ -192,7 +192,7 @@ ClassMethod AgentTurn() As %Status
 {
 	try {
 		set body = ..Payload()
-		return ..Ok({"data": (##class(App.Agent.Loop).Turn(body.%Get("sessionId"), body.%Get("message"), body.%Get("confirmToken"), ''body.%Get("decline")))})
+		return ..Ok({"data": (##class(App.Agent.Loop).Turn(body.%Get("sessionId"), body.%Get("message"), body.%Get("confirmToken"), ''body.%Get("decline"), body.%Get("model")))})
 	} catch ex {
 		return ..Failed(ex)
 	}

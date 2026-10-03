@@ -47,7 +47,16 @@ async function run(load, message = "", isTurn = false) {
 }
 
 const turn = (body) =>
-  run(() => api("/agent/turn", { sessionId: state.value?.sessionId, ...body }), body.message, true);
+  run(
+    () =>
+      api("/agent/turn", {
+        sessionId: state.value?.sessionId,
+        model: state.value?.models && state.value.model,
+        ...body,
+      }),
+    body.message,
+    true,
+  );
 const load = (id) => run(() => api(id ? `/agent/session/${encodeURIComponent(id)}` : "/agent/session"));
 
 function start() {
@@ -98,11 +107,20 @@ const items = computed(() => {
 <template>
   <Block
     title="AGENT"
-    :meta="state ? `${state.mode} · ${state.model}` : 'starting…'"
+    :meta="state ? state.mode : 'starting…'"
     meta-title="LLM_MODE decides this. In mock the scenario is recorded and no key exists anywhere; in live the key comes from the environment and never reaches the browser."
     class="min-w-0 flex-1"
   >
     <template #actions>
+      <select
+        v-if="state"
+        v-model="state.model"
+        :disabled="busy || !state.models"
+        title="Model for this conversation, from OPENROUTER_MODELS. Applies from the next message. Nothing to switch in mock."
+        class="h-[22px] max-w-[16rem] rounded-control border border-line-strong bg-base px-1 text-micro text-text-muted disabled:opacity-50"
+      >
+        <option v-for="m in state.models ?? [state.model]" :key="m" :value="m">{{ m }}</option>
+      </select>
       <button
         class="h-[22px] rounded-control border border-line-strong px-2 text-micro text-text-muted transition-colors hover:bg-surface-raised hover:text-text"
         title="Start a fresh conversation; this one stays in the list"

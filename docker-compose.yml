@@ -19,6 +19,7 @@ services:
       LLM_MODE: ${LLM_MODE:-mock}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+      OPENROUTER_MODELS: ${OPENROUTER_MODELS:-}
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:52773/portal/index.html"]
       interval: 10s

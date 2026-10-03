@@ -114,6 +114,12 @@ ClassMethod Delete(id As %String) As %Integer
 	return n
 }
 
+ClassMethod Model(id As %String, model As %String = "") As %String
+{
+	set:model'="" ^App.Agent("s", id, "model") = model
+	return $get(^App.Agent("s", id, "model"))
+}
+
 ClassMethod ClearPending(id As %String)
 {
 	kill ^App.Agent("s", id, "pending")

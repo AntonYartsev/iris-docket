@@ -30,9 +30,17 @@ Rules you are held to, not merely asked to follow:
   was refused, say so plainly - a refusal is a useful answer, not a failure to work around.
 }
 
-ClassMethod Turn(sessionId As %String = "", message As %String = "", confirmToken As %String = "", decline As %Boolean = 0) As %DynamicObject
+ClassMethod Turn(sessionId As %String = "", message As %String = "", confirmToken As %String = "", decline As %Boolean = 0, model As %String = "") As %DynamicObject
 {
 	set:(sessionId="")||('##class(App.Agent.Session).Exists(sessionId)) sessionId = ##class(App.Agent.Session).New()
+	if model '= "" {
+		set ok = 0, it = ##class(App.Agent.Llm).Models().%GetIterator()
+		while it.%GetNext(.i, .m) {
+			set:m=model ok = 1
+		}
+		do:'ok ##class(App.Err).Throw("bad_request", "model "_model_" is not on the list this instance allows (OPENROUTER_MODELS)")
+		do ##class(App.Agent.Session).Model(sessionId, model)
+	}
 	set t0 = $zhorolog, calls = 0
 	set p = ##class(App.Agent.Session).Pending(sessionId)
 
@@ -60,7 +68,7 @@ ClassMethod Turn(sessionId As %String = "", message As %String = "", confirmToke
 	for step = 1:1:..#MaxSteps {
 		set fail = ""
 		try {
-			set reply = ##class(App.Agent.Llm).Chat(..Wire(sessionId), tools)
+			set reply = ##class(App.Agent.Llm).Chat(..Wire(sessionId), tools, ##class(App.Agent.Session).Model(sessionId))
 		} catch ex {
 			set fail = $select(ex.%IsA("App.Err"): ex.Data, 1: ex.DisplayString())
 		}
@@ -222,7 +230,9 @@ ClassMethod Resolve(name As %String) As %String
 ClassMethod State(sessionId As %String, stopped As %String = "") As %DynamicObject
 {
 	set out = {"sessionId": (sessionId), "mode": (##class(App.Agent.Llm).Mode()), "messages": (##class(App.Agent.Session).Messages(sessionId))}
-	set out.model = $select(out.mode = "live": ##class(App.Agent.Llm).Model(), 1: "recorded scenario")
+	set out.model = $select(out.mode = "live": ##class(App.Agent.Session).Model(sessionId), 1: "recorded scenario")
+	set:out.model="" out.model = ##class(App.Agent.Llm).Model()
+	set:out.mode="live" out.models = ##class(App.Agent.Llm).Models()
 	set:stopped'="" out.stopped = stopped
 	set p = ##class(App.Agent.Session).Pending(sessionId)
 	set:$isobject(p) out.pending = p.detail

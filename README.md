@@ -174,7 +174,8 @@ reaches the browser. Created only if missing, grant it `DocketOperator`.
 - no create / delete for web apps and tasks
 - secrets are read only, by design
 - Interop: read, start, stop. No resend, no config
-- live agent: OpenRouter models with tool calling, tested on `google/gemini-2.5-flash`
+- live agent: OpenRouter models with tool calling, switched per conversation from the console, tested on
+  `google/gemini-2.5-flash`
 - dark desktop layout
 
 ## Tests and CI
@@ -192,7 +193,8 @@ up to date).
 ## Community ideas
 
 - [DPI-I-516](https://ideas.intersystems.com/ideas/DPI-I-516) Integration with LLMs like GPT, llama: the
-  Agent screen, any OpenRouter model with tool calling (GPT, Llama, Claude, Gemini), `App.Agent.Llm`
+  Agent screen, model switch in the console (GPT, Llama, Claude, Gemini via OpenRouter, list in
+  `OPENROUTER_MODELS`), `App.Agent.Llm`
 - [DPI-I-261](https://ideas.intersystems.com/ideas/DPI-I-261) IRIS and ZPM (Open Exchange) integration:
   the Packages screen, install / upgrade / uninstall from `pm.community.intersystems.com`, `App.Tools.Packages`
 
